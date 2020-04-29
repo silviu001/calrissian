@@ -313,32 +313,54 @@ class KubernetesPodBuilder(object):
         """
         return {str(k): str(v) for k, v in self.labels.items()}
 
-    def build(self):
-        return {
+    def build(self, bindings=None):
+        pod_descriptor = {
             'metadata': {
                 'name': self.pod_name(),
                 'labels': self.pod_labels(),
             },
             'apiVersion': 'v1',
             'kind':'Pod',
-                'spec': {
-                    'initContainers': self.init_containers(),
-                    'containers': [
-                        {
-                            'name': self.container_name(),
-                            'image': self.container_image,
-                            'command': self.container_command(),
-                            'args': self.container_args(),
-                            'env': self.container_environment(),
-                            'resources': self.container_resources(),
-                            'volumeMounts': self.volume_mounts,
-                            'workingDir': self.container_workingdir(),
-                         }
-                    ],
-                    'restartPolicy': 'Never',
-                    'volumes': self.volumes
+            'spec': {
+                'initContainers': self.init_containers(),
+                'containers': [
+                    {
+                        'name': self.container_name(),
+                        'image': self.container_image,
+                        'command': self.container_command(),
+                        'args': self.container_args(),
+                        'env': self.container_environment(),
+                        'resources': self.container_resources(),
+                        'volumeMounts': self.volume_mounts,
+                        'workingDir': self.container_workingdir()
+                        }
+                ],
+                'restartPolicy': 'Never',
+                'volumes': self.volumes
             }
         }
+
+        if bindings:
+            # Verify if CWL step has a baseCommand defined by inspecting cwl.builder.bindings
+            #   - support CWL definition where baseComand is not defined: remove `command` and 
+            #     add arguments as list
+            # Modification needed to support: https://github.com/mneagul/ewps-server (WPS 2.0.0 implementation)
+            #
+            log.debug('[eWPS custom POD] Starting POD adaptation ...')
+            _args = []
+            _cmds = []
+            _cmds = [ b['datum'] for b in bindings if b['position'][0] == -1000000 ]
+            _args = [ c for c in self.command_line if c not in _cmds ]
+            log.debug('[eWPS custom POD] computed _args: {}'.format(_args))
+            log.debug('[eWPS custom POD] computed _cmds: {}'.format(_cmds))
+            if len(_cmds) == 0:
+                log.debug('[eWPS custom POD] modifying POD specs ...')
+                _temp = pod_descriptor['spec']['containers'][0]
+                del(_temp['command'])
+                _temp['args'] = _args
+                pod_descriptor['spec']['containers'] = [ _temp ]
+
+        return pod_descriptor
 
 
 # This now subclasses ContainerCommandLineJob, but only uses two of its methods:
@@ -492,7 +514,8 @@ class CalrissianCommandLineJob(ContainerCommandLineJob):
             self.builder.resources,
             pod_labels,
         )
-        built = k8s_builder.build()
+        # silviu001:eWPS: extended KubernetesPodBuilder.build() with cwltool.builder.bindings support
+        built = k8s_builder.build(self.builder.bindings)
         log.debug('{}\n{}{}\n'.format('-' * 80, yaml.dump(built), '-' * 80))
         # Report an error if anything was added to the runtime list
         if runtime:

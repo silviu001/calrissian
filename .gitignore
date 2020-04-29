@@ -2,3 +2,4 @@ venv
 cwl/tmp
 cwl/out
 .coverage
+__pycache__
