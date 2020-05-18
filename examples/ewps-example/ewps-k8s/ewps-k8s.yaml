@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
       - name: ewps-k8s
-        image: ewps-cwl-engine:2.0
+        image: ewps-cwl-engine:2.1
         command: ["calrissian"]
         args:
           - "--debug"
@@ -26,8 +26,8 @@ spec:
           - "/ewps/app/output-data"
           - "--usage-report"
           - "/ewps/app/ewps-k8s-usage.json"
-          - "/ewps/app/ndvi-stacker.cwl"
-          - "/ewps/app/ndvi-stacker-input.yaml"
+          - "/ewps/app/NDVI-Stacker.cwl"
+          - "/ewps/app/NDVI-Stacker-input.yaml"
         volumeMounts:
         - mountPath: /ewps/app
           name: nfs-pvc
