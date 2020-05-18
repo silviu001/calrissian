@@ -10,13 +10,13 @@ RUN pip install /app
 WORKDIR /app
 
 # Create a default user and home directory
-ENV HOME=/home/calrissian
+#ENV HOME=/home/calrissian
 # home dir is created by useradd with group (g=0) to comply with
 # https://docs.openshift.com/container-platform/3.11/creating_images/guidelines.html#openshift-specific-guidelines
-RUN useradd -u 1001 -r -g 0 -m -d ${HOME} -s /sbin/nologin \
-      -c "Default Calrissian User" calrissian && \
-  chown -R 1001:0 /app && \
-  chmod g+rwx ${HOME}
+#RUN useradd -u 1001 -r -g 0 -m -d ${HOME} -s /sbin/nologin \
+#      -c "Default Calrissian User" calrissian && \
+#  chown -R 1001:0 /app && \
+#  chmod g+rwx ${HOME}
 
 USER calrissian
 CMD ["calrissian"]

@@ -1,0 +1,5 @@
+files:
+- class: File
+  path: /ewps/app/img1.tif
+- class: File
+  path: /ewps/app/img2.tif

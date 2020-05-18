@@ -1,0 +1,44 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ewps-k8s
+spec:
+  template:
+    spec:
+      containers:
+      - name: ewps-k8s
+        image: ewps-cwl-engine
+        command: ["calrissian"]
+        args:
+          - "--debug"
+          - "--stdout"
+          - "/ewps/app/ewps-k8s-output.json"
+          - "--stderr"
+          - "/ewps/app/ewps-k8s-stderr.log"
+          - "--max-ram"
+          - "4G"
+          - "--max-cores"
+          - "2"
+          - "--tmp-outdir-prefix"
+          - "/ewps/app/tmpout"
+          - "--outdir"
+          - "/ewps/app/output-data"
+          - "--usage-report"
+          - "/ewps/app/ewps-k8s-usage.json"
+          - "/ewps/app/ndvi-stacker.cwl"
+          - "/ewps/app/ndvi-stacker-input.yaml"
+        volumeMounts:
+        - mountPath: /ewps/app
+          name: nfs-pvc
+          subPath: ewps-k8s
+        env:
+        - name: CALRISSIAN_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      restartPolicy: Never
+      volumes:
+      - name: nfs-pvc
+        persistentVolumeClaim:
+          claimName: testing-storage
