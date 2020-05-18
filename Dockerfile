@@ -18,5 +18,5 @@ WORKDIR /app
 #  chown -R 1001:0 /app && \
 #  chmod g+rwx ${HOME}
 
-USER calrissian
+#USER calrissian
 CMD ["calrissian"]

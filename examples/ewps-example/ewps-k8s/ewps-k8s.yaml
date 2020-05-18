@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
       - name: ewps-k8s
-        image: ewps-cwl-engine
+        image: ewps-cwl-engine:2.0
         command: ["calrissian"]
         args:
           - "--debug"
