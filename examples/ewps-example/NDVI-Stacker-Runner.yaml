@@ -1,0 +1,44 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ndvi-stacker
+spec:
+  template:
+    spec:
+      containers:
+      - name: nvdi-stacker
+        image: ewps-cwl-engine:0.31
+        command: ["calrissian"]
+        args:
+          - "--debug"
+          - "--stdout"
+          - "/app/ndvi-stacker/ndvi-stacker-output.json"
+          - "--stderr"
+          - "/app/ndvi-stacker/ndvi-stacker-stderr.log"
+          - "--max-ram"
+          - "4G"
+          - "--max-cores"
+          - "2"
+          - "--tmp-outdir-prefix"
+          - "/app/ndvi-stacker/tmpout"
+          - "--outdir"
+          - "/app/ndvi-stacker/output-data"
+          - "--usage-report"
+          - "/app/ndvi-stacker/ndvi-stacker-usage.json"
+          - "/app/ndvi-stacker/ndvi-stacker.cwl"
+          - "/app/ndvi-stacker/ndvi-stacker-input.yaml"
+        volumeMounts:
+        - mountPath: /app/ndvi-stacker
+          name: nfs-pvc
+          subPath: ndvi-stacker
+        env:
+        - name: CALRISSIAN_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      restartPolicy: Never
+      volumes:
+      - name: nfs-pvc
+        persistentVolumeClaim:
+          claimName: testing-storage
