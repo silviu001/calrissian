@@ -11,6 +11,7 @@ import tempfile
 import random
 import string
 import shellescape
+import shlex
 import re
 from cwltool.pathmapper import ensure_writable, ensure_non_writable
 from cwltool.utils import visit_class
@@ -59,7 +60,7 @@ def read_yaml(filename):
 def quoted_arg_list(arg_list):
         shouldquote = needs_shell_quoting_re.search
         return [shellescape.quote(arg) if shouldquote(arg) else arg for arg in arg_list]
-
+ 
 
 def total_size(outputs):
     """
@@ -350,7 +351,10 @@ class KubernetesPodBuilder(object):
             _args = []
             _cmds = []
             _cmds = [ b['datum'] for b in bindings if b['position'][0] == -1000000 ]
-            _args = [ c for c in self.command_line if c not in _cmds ]
+            if len(_cmds) == 0:
+                _args = [ shlex.split(c)[0] for c in self.command_line if c not in _cmds ]
+            else:
+                _args = [ c for c in self.command_line if c not in _cmds ]
             log.debug('[eWPS custom POD] computed _args: {}'.format(_args))
             log.debug('[eWPS custom POD] computed _cmds: {}'.format(_cmds))
             if len(_cmds) == 0:
