@@ -360,6 +360,12 @@ class KubernetesPodBuilder(object):
                 _temp['args'] = _args
                 pod_descriptor['spec']['containers'] = [ _temp ]
 
+        docker_registry_secret = os.env.get('K8S_EWPS_DOCKER_REGISTRY_SECRET', None)
+        if docker_registry_secret:
+            image_pull_secrets = pod_descriptor['spec'].get('imagePullSecrets', [])
+            pod_descriptor['spec'] = image_pull_secrets
+            image_pull_secrets.append({'name': docker_registry_secret})
+
         return pod_descriptor
 
 
