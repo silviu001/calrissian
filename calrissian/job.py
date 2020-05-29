@@ -626,6 +626,7 @@ class CalrissianCommandLineJob(ContainerCommandLineJob):
         self.populate_env_vars()
         self._setup(runtimeContext)
         pod = self.create_kubernetes_runtime(runtimeContext) # analogous to create_runtime()
+        log.warning(pod)
         self.execute_kubernetes_pod(pod) # analogous to _execute()
         completion_result = self.wait_for_kubernetes_pod()
         self.finish(completion_result, runtimeContext)

@@ -16,9 +16,9 @@ spec:
         volumeMounts:
         - mountPath: /ewps/app
           name: nfs-pvc
-          subPath: ewps-k8s
+          #subPath: ewps-k8s
       restartPolicy: OnFailure
       volumes:
       - name: nfs-pvc
         persistentVolumeClaim:
-          claimName: testing-storage
+          claimName: nfs-client

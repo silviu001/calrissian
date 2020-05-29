@@ -75,7 +75,16 @@ class KubernetesClient(object):
     @retry_exponential_if_exception_type((ApiException, HTTPError,), log)
     def submit_pod(self, pod_body):
         with PodMonitor() as monitor:
+            log.warning(f'pod_body before:\n{pod_body}\n----------------------------------------------------------')
+            if self._pod_resources is not None:
+                pod_body['spec']['containers'][0]['resources'] = self._pod_resources
+            if self._pod_affinity is not None:
+                pod_body['spec']['affinity'] = self._pod_affinity
+            if self._pod_tolerations is not None:
+                pod_body['spec']['tolerations'] = self._pod_tolerations
+            log.warning(f'pod_body after:\n{pod_body}\n----------------------------------------------------------')
             pod = self.core_api_instance.create_namespaced_pod(self.namespace, pod_body)
+            
             log.info('Created k8s pod name {} with id {}'.format(pod.metadata.name, pod.metadata.uid))
             monitor.add(pod)
             self._set_pod(pod)
@@ -236,6 +245,25 @@ class KubernetesClient(object):
             raise CalrissianJobException("Unable to find pod with name {}".format(pod_name))
         if len(pod_list.items) != 1:
             raise CalrissianJobException("Multiple pods found with name {}".format(pod_name))
+        
+        # set get tolerations and affinity
+        try:
+            self._pod_tolerations = pod_list.items[0].spec.tolerations
+        except:
+            self._pod_tolerations = None
+        try:
+            self._pod_affinity = pod_list.items[0].spec.affinity
+        except:
+            self._pod_affinity = None
+        try:
+            self._pod_resources = pod_list.items[0].spec.containers[0].resources
+        except:
+            self._pod_resources = None
+        ##
+        log.debug(f'_pod_resources: {self._pod_resources}')
+        log.debug(f'_pod_affinity: {self._pod_affinity}')
+        log.debug(f'_pod_tolerations: {self._pod_tolerations}')
+
         return pod_list.items[0]
 
     def get_current_pod(self):
