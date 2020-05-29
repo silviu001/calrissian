@@ -631,6 +631,7 @@ class CalrissianCommandLineJob(ContainerCommandLineJob):
         completion_result = self.wait_for_kubernetes_pod()
         self.finish(completion_result, runtimeContext)
 
+
     # Below are concrete implementations of the remaining abstract methods in ContainerCommandLineJob
     # They are not implemented and not expected to be called, so they all raise NotImplementedError
 
