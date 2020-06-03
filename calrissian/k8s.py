@@ -76,8 +76,8 @@ class KubernetesClient(object):
     def submit_pod(self, pod_body):
         with PodMonitor() as monitor:
             log.warning(f'pod_body before:\n{pod_body}\n----------------------------------------------------------')
-            if self._pod_resources is not None:
-                pod_body['spec']['containers'][0]['resources'] = self._pod_resources
+            #if self._pod_resources is not None:
+            #    pod_body['spec']['containers'][0]['resources'] = self._pod_resources
             if self._pod_affinity is not None:
                 pod_body['spec']['affinity'] = self._pod_affinity
             if self._pod_tolerations is not None:
@@ -246,6 +246,7 @@ class KubernetesClient(object):
         if len(pod_list.items) != 1:
             raise CalrissianJobException("Multiple pods found with name {}".format(pod_name))
         
+        log.debug(f'main POD specs: {pod_list.items[0]}')
         # set get tolerations and affinity
         try:
             self._pod_tolerations = pod_list.items[0].spec.tolerations
@@ -255,12 +256,12 @@ class KubernetesClient(object):
             self._pod_affinity = pod_list.items[0].spec.affinity
         except:
             self._pod_affinity = None
-        try:
-            self._pod_resources = pod_list.items[0].spec.containers[0].resources
-        except:
-            self._pod_resources = None
+        #try:
+        #    self._pod_resources = pod_list.items[0].spec.containers[0].resources
+        #except:
+        #    self._pod_resources = None
         ##
-        log.debug(f'_pod_resources: {self._pod_resources}')
+        #log.debug(f'_pod_resources: {self._pod_resources}')
         log.debug(f'_pod_affinity: {self._pod_affinity}')
         log.debug(f'_pod_tolerations: {self._pod_tolerations}')
 
